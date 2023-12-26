@@ -7,17 +7,22 @@ struct HistoryView: View {
     @State private var isLoading = true
 
     var body: some View {
-        List {
-            ForEach(viewModel.healthDataRecords, id: \.date) { record in
-                recordRow(record)
+        VStack {
+            List {
+                ForEach(viewModel.healthDataRecords, id: \.date) { record in
+                    recordRow(record)
+                }
+                .onDelete(perform: deleteRecord)
             }
-            .onDelete(perform: deleteRecord)
-        }
-        .onAppear {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                isLoading = false
+            .onAppear {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                    isLoading = false
+                }
+                setupNavigationBar()
             }
-            setupNavigationBar()
+            .onAppear {
+                viewModel.fetchLatestHealthData()
+            }
         }
     }
     

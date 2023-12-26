@@ -6,7 +6,7 @@ import SwiftUICharts
 struct GraphView: View {
     @EnvironmentObject var viewModel: HealthDataViewModel
     @State private var selectedPeriod: Period = .week
-    @State private var isLoading = false
+    @State private var isLoading = true
 
     var body: some View {
         VStack {
@@ -71,8 +71,10 @@ struct GraphView: View {
 
             Spacer()
         }
+        .onAppear {
+            loadData()
+        }
         .background(Color(red: 44 / 255, green: 44 / 255, blue: 46 / 255))
-//        .navigationTitle("グラフ")
         .foregroundColor(.white)
     }
     
@@ -81,6 +83,14 @@ struct GraphView: View {
         viewModel.fetchLatestHealthData()
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
             isLoading = false 
+        }
+    }
+    
+    func loadData() {
+        isLoading = true // ローディング状態を開始
+        viewModel.fetchLatestHealthData() 
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            isLoading = false
         }
     }
 }
