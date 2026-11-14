@@ -3,54 +3,74 @@
 import SwiftUI
 
 struct TermsAndPrivacyAgreementView: View {
-    @Binding var isShowingTerms: Bool
-    @Binding var hasAgreedToTerms: Bool
-    @State private var isShowingTermsView = false
-    @State private var isShowingPrivacyPolicyView = false
+    var onAgree: () -> Void
+
+    @State private var isShowingTerms = false
+    @State private var isShowingPrivacyPolicy = false
 
     var body: some View {
-        VStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 10) {
-                    Spacer().frame(height: 20)
-                    Text("本アプリでは、お客様の体験を向上させるために広告を表示します。詳細については、以下の利用規約とプライバシーポリシーをご確認ください。")
-                        .font(.subheadline)
-                        .padding(.horizontal)
+        VStack(spacing: 24) {
+            Spacer()
 
-                    HStack {
-                        Spacer()
-                        
-                        Button("利用規約") {
-                            isShowingTermsView = true
-                        }
-                        .sheet(isPresented: $isShowingTermsView) {
-                            TermsView()
-                        }
+            Image(systemName: "scalemass.fill")
+                .font(.system(size: 56))
+                .foregroundStyle(Color.accentColor)
 
-                        Spacer()
-
-                        Button("プライバシーポリシー") {
-                            isShowingPrivacyPolicyView = true
-                        }
-                        .sheet(isPresented: $isShowingPrivacyPolicyView) {
-                            PrivacyPolicyView()
-                        }
-                        
-                        Spacer()
-                    }
-                    .frame(maxWidth: .infinity)
-                }
-                .frame(maxWidth: .infinity)
+            VStack(spacing: 8) {
+                Text("LightTrack へようこそ")
+                    .font(.title2.bold())
+                Text("体重・体脂肪率・BMI をシンプルに記録できます。記録したデータはこの端末内にのみ保存されます。")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
             }
 
-            // 同意するボタン
-            Button("同意する") {
-                UserDefaults.standard.set(true, forKey: "hasAgreedToTerms")
-                self.hasAgreedToTerms = true
-                self.isShowingTerms = false
+            Text("本アプリでは広告を表示します。ご利用の前に、利用規約とプライバシーポリシーをご確認ください。")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+
+            HStack(spacing: 24) {
+                Button("利用規約") { isShowingTerms = true }
+                Button("プライバシーポリシー") { isShowingPrivacyPolicy = true }
             }
-            .frame(maxWidth: .infinity)
+            .font(.subheadline.weight(.semibold))
+
+            Spacer()
+
+            Button("同意してはじめる", action: onAgree)
+                .buttonStyle(PrimaryButtonStyle())
         }
-        .padding()
+        .padding(24)
+        .sheet(isPresented: $isShowingTerms) {
+            DocumentSheet(title: "利用規約") { TermsView() }
+        }
+        .sheet(isPresented: $isShowingPrivacyPolicy) {
+            DocumentSheet(title: "プライバシーポリシー") { PrivacyPolicyView() }
+        }
     }
+}
+
+/// 規約類をシートで表示するためのラッパー
+private struct DocumentSheet<Content: View>: View {
+    let title: String
+    @ViewBuilder var content: Content
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            content
+                .navigationTitle(title)
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("閉じる") { dismiss() }
+                    }
+                }
+        }
+    }
+}
+
+#Preview {
+    TermsAndPrivacyAgreementView {}
 }

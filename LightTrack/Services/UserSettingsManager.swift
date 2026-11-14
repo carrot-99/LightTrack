@@ -1,47 +1,41 @@
 //  UserSettingsManager.swift
 
 import CoreData
-import SwiftUI
 
-class UserSettingsManager {
+/// 身長などのユーザ設定を保存する。DataManager と同じ Core Data スタックを共有する。
+final class UserSettingsManager {
     static let shared = UserSettingsManager()
-    let container: NSPersistentContainer
-    
-    init() {
-        container = NSPersistentContainer(name: "LightTrackDataModel")
-        container.loadPersistentStores { (storeDescription, error) in
-            if let error = error as NSError? {
-                fatalError("Unresolved error \(error), \(error.userInfo)")
-            }
-        }
+
+    static let defaultHeight: Double = 170.0
+
+    private let dataManager: DataManager
+    private var context: NSManagedObjectContext { dataManager.context }
+
+    init(dataManager: DataManager = .shared) {
+        self.dataManager = dataManager
     }
 
-    func saveHeight(height: Double) {
-        let context = container.viewContext
-        let request: NSFetchRequest<UserSettingsEntity> = UserSettingsEntity.fetchRequest()
-        if let settings = try? context.fetch(request).first {
-            settings.height = height
-        } else {
-            let newSettings = UserSettingsEntity(context: context)
-            newSettings.height = height
-        }
-        
+    func saveHeight(_ height: Double) {
+        let settings = fetchSettings() ?? UserSettingsEntity(context: context)
+        settings.height = height
         do {
             try context.save()
-            print("Success save height: \(height)")
         } catch {
+            context.rollback()
             print("Failed to save height: \(error)")
         }
     }
 
     func fetchHeight() -> Double {
-        let context = container.viewContext
-        let request: NSFetchRequest<UserSettingsEntity> = UserSettingsEntity.fetchRequest()
-        
-        if let settings = try? context.fetch(request).first {
-            return settings.height
-        } else {
-            return 170.0
+        guard let height = fetchSettings()?.height, height > 0 else {
+            return Self.defaultHeight
         }
+        return height
+    }
+
+    private func fetchSettings() -> UserSettingsEntity? {
+        let request: NSFetchRequest<UserSettingsEntity> = UserSettingsEntity.fetchRequest()
+        request.fetchLimit = 1
+        return try? context.fetch(request).first
     }
 }

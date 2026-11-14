@@ -2,35 +2,34 @@
 
 import SwiftUI
 
+/// 初回起動フロー（規約同意 → 身長入力）とメイン画面の切り替え
 struct ContentView: View {
-    @AppStorage("hasLaunchedBefore") var hasLaunchedBefore: Bool = false
-    @EnvironmentObject var viewModel: HealthDataViewModel
-    @State private var isShowingTerms = true
-    @State private var hasAgreedToTerms = UserDefaults.standard.bool(forKey: "hasAgreedToTerms")
+    @EnvironmentObject private var viewModel: HealthDataViewModel
+    @AppStorage("hasAgreedToTerms") private var hasAgreedToTerms = false
+    /// 身長入力が完了しているか（旧バージョンとの互換のためキー名は維持）
+    @AppStorage("hasLaunchedBefore") private var hasCompletedOnboarding = false
 
     var body: some View {
-        NavigationView {
-            ZStack(alignment: .bottom) {
-                if hasAgreedToTerms {
-                    if !hasLaunchedBefore {
-                        InitialHeightView { newHeight in
-                            UserSettingsManager.shared.saveHeight(height: newHeight)
-                            self.hasLaunchedBefore = true
-                        }
-                        .environmentObject(HealthDataViewModel())
-                    } else {
-                        InitialView()
-                            .environmentObject(HealthDataViewModel())
-                    }
-                    
-                    AdMobBannerView()
-                        .frame(width: UIScreen.main.bounds.width, height: 50)
-                        .background(Color.gray.opacity(0.1))
-                } else {
-                    TermsAndPrivacyAgreementView(isShowingTerms: $isShowingTerms, hasAgreedToTerms: $hasAgreedToTerms)
+        Group {
+            if !hasAgreedToTerms {
+                TermsAndPrivacyAgreementView {
+                    hasAgreedToTerms = true
                 }
+            } else if !hasCompletedOnboarding {
+                InitialHeightView { height in
+                    viewModel.updateHeight(height)
+                    hasCompletedOnboarding = true
+                }
+            } else {
+                MainTabView()
             }
         }
-        .navigationViewStyle(StackNavigationViewStyle())
+        .animation(.default, value: hasAgreedToTerms)
+        .animation(.default, value: hasCompletedOnboarding)
     }
+}
+
+#Preview {
+    ContentView()
+        .environmentObject(HealthDataViewModel.preview)
 }

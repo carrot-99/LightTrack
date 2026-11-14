@@ -19,18 +19,15 @@
 		CEA7440A2B36CD7400DFA3CF /* HealthDataViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEA744092B36CD7400DFA3CF /* HealthDataViewModel.swift */; };
 		CEA7440C2B36CDE900DFA3CF /* DataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEA7440B2B36CDE900DFA3CF /* DataManager.swift */; };
 		CEA7440F2B36CE9B00DFA3CF /* LightTrackDataModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = CEA7440D2B36CE9B00DFA3CF /* LightTrackDataModel.xcdatamodeld */; };
-		CEA744112B36D18300DFA3CF /* InitialView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEA744102B36D18300DFA3CF /* InitialView.swift */; };
 		CEA744132B36D2B100DFA3CF /* UserSettingsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEA744122B36D2B100DFA3CF /* UserSettingsManager.swift */; };
 		CEA744152B36D2D500DFA3CF /* InitialHeightView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEA744142B36D2D500DFA3CF /* InitialHeightView.swift */; };
 		CEA744172B36D2F300DFA3CF /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEA744162B36D2F300DFA3CF /* SettingsView.swift */; };
 		CEA744192B36D9C900DFA3CF /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEA744182B36D9C900DFA3CF /* MainTabView.swift */; };
 		CEA744232B37216C00DFA3CF /* RecordDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEA744222B37216C00DFA3CF /* RecordDetailView.swift */; };
-		CEA7442F2B37C71800DFA3CF /* SwiftUICharts in Frameworks */ = {isa = PBXBuildFile; productRef = CEA7442E2B37C71800DFA3CF /* SwiftUICharts */; };
 		CEA744312B380BF400DFA3CF /* TermsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEA744302B380BF400DFA3CF /* TermsView.swift */; };
 		CEA744332B380DE600DFA3CF /* PrivacyPolicyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEA744322B380DE600DFA3CF /* PrivacyPolicyView.swift */; };
 		CEA744362B380E5000DFA3CF /* UserInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEA744352B380E5000DFA3CF /* UserInfoView.swift */; };
-		CEA7443C2B38211600DFA3CF /* CustomTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEA7443B2B38211600DFA3CF /* CustomTextField.swift */; };
-		CEA7443E2B39131500DFA3CF /* SwiftUICharts in Frameworks */ = {isa = PBXBuildFile; productRef = CEA7443D2B39131500DFA3CF /* SwiftUICharts */; };
+		CEA7443C2B38211600DFA3CF /* Components.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEA7443B2B38211600DFA3CF /* Components.swift */; };
 		CEA744402B392AD800DFA3CF /* AdMobBannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEA7443F2B392AD800DFA3CF /* AdMobBannerView.swift */; };
 		CEA744432B392D5E00DFA3CF /* TermsAndPrivacyAgreementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEA744422B392D5E00DFA3CF /* TermsAndPrivacyAgreementView.swift */; };
 /* End PBXBuildFile section */
@@ -50,7 +47,6 @@
 		CEA744092B36CD7400DFA3CF /* HealthDataViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthDataViewModel.swift; sourceTree = "<group>"; };
 		CEA7440B2B36CDE900DFA3CF /* DataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataManager.swift; sourceTree = "<group>"; };
 		CEA7440E2B36CE9B00DFA3CF /* LightTrackDataModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = LightTrackDataModel.xcdatamodel; sourceTree = "<group>"; };
-		CEA744102B36D18300DFA3CF /* InitialView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InitialView.swift; sourceTree = "<group>"; };
 		CEA744122B36D2B100DFA3CF /* UserSettingsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserSettingsManager.swift; sourceTree = "<group>"; };
 		CEA744142B36D2D500DFA3CF /* InitialHeightView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InitialHeightView.swift; sourceTree = "<group>"; };
 		CEA744162B36D2F300DFA3CF /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
@@ -59,7 +55,7 @@
 		CEA744302B380BF400DFA3CF /* TermsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TermsView.swift; sourceTree = "<group>"; };
 		CEA744322B380DE600DFA3CF /* PrivacyPolicyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyPolicyView.swift; sourceTree = "<group>"; };
 		CEA744352B380E5000DFA3CF /* UserInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserInfoView.swift; sourceTree = "<group>"; };
-		CEA7443B2B38211600DFA3CF /* CustomTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomTextField.swift; sourceTree = "<group>"; };
+		CEA7443B2B38211600DFA3CF /* Components.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Components.swift; sourceTree = "<group>"; };
 		CEA7443F2B392AD800DFA3CF /* AdMobBannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdMobBannerView.swift; sourceTree = "<group>"; };
 		CEA744412B392BD400DFA3CF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		CEA744422B392D5E00DFA3CF /* TermsAndPrivacyAgreementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TermsAndPrivacyAgreementView.swift; sourceTree = "<group>"; };
@@ -71,8 +67,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CEA7442F2B37C71800DFA3CF /* SwiftUICharts in Frameworks */,
-				CEA7443E2B39131500DFA3CF /* SwiftUICharts in Frameworks */,
 				20B0B0CB7C414F3A66875D9A /* Pods_LightTrack.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -164,7 +158,7 @@
 		CEA743FD2B36C8DF00DFA3CF /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
-				CEA7443B2B38211600DFA3CF /* CustomTextField.swift */,
+				CEA7443B2B38211600DFA3CF /* Components.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -203,7 +197,6 @@
 			children = (
 				CEA743ED2B36C7FC00DFA3CF /* ContentView.swift */,
 				CEA744142B36D2D500DFA3CF /* InitialHeightView.swift */,
-				CEA744102B36D18300DFA3CF /* InitialView.swift */,
 				CEA744182B36D9C900DFA3CF /* MainTabView.swift */,
 			);
 			path = Main;
@@ -252,10 +245,6 @@
 			dependencies = (
 			);
 			name = LightTrack;
-			packageProductDependencies = (
-				CEA7442E2B37C71800DFA3CF /* SwiftUICharts */,
-				CEA7443D2B39131500DFA3CF /* SwiftUICharts */,
-			);
 			productName = LightTrack;
 			productReference = CEA743E82B36C7FB00DFA3CF /* LightTrack.app */;
 			productType = "com.apple.product-type.application";
@@ -277,16 +266,14 @@
 			};
 			buildConfigurationList = CEA743E32B36C7FB00DFA3CF /* Build configuration list for PBXProject "LightTrack" */;
 			compatibilityVersion = "Xcode 14.0";
-			developmentRegion = en;
+			developmentRegion = ja;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				ja,
 				Base,
 			);
 			mainGroup = CEA743DF2B36C7FB00DFA3CF;
-			packageReferences = (
-				CEA7442D2B37C71800DFA3CF /* XCRemoteSwiftPackageReference "SwiftUICharts" */,
-			);
 			productRefGroup = CEA743E92B36C7FB00DFA3CF /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -355,14 +342,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CEA744112B36D18300DFA3CF /* InitialView.swift in Sources */,
 				CEA7440A2B36CD7400DFA3CF /* HealthDataViewModel.swift in Sources */,
 				CEA744082B36CC5500DFA3CF /* HistoryView.swift in Sources */,
 				CEA744432B392D5E00DFA3CF /* TermsAndPrivacyAgreementView.swift in Sources */,
 				CEA744332B380DE600DFA3CF /* PrivacyPolicyView.swift in Sources */,
 				CEA744402B392AD800DFA3CF /* AdMobBannerView.swift in Sources */,
 				CEA744132B36D2B100DFA3CF /* UserSettingsManager.swift in Sources */,
-				CEA7443C2B38211600DFA3CF /* CustomTextField.swift in Sources */,
+				CEA7443C2B38211600DFA3CF /* Components.swift in Sources */,
 				CEA744152B36D2D500DFA3CF /* InitialHeightView.swift in Sources */,
 				CEA744002B36C92900DFA3CF /* HealthData.swift in Sources */,
 				CEA744022B36CB1A00DFA3CF /* HomeView.swift in Sources */,
@@ -520,7 +506,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -553,7 +539,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -590,29 +576,6 @@
 		};
 /* End XCConfigurationList section */
 
-/* Begin XCRemoteSwiftPackageReference section */
-		CEA7442D2B37C71800DFA3CF /* XCRemoteSwiftPackageReference "SwiftUICharts" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/willdale/SwiftUICharts";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 2.10.2;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		CEA7442E2B37C71800DFA3CF /* SwiftUICharts */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = CEA7442D2B37C71800DFA3CF /* XCRemoteSwiftPackageReference "SwiftUICharts" */;
-			productName = SwiftUICharts;
-		};
-		CEA7443D2B39131500DFA3CF /* SwiftUICharts */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = CEA7442D2B37C71800DFA3CF /* XCRemoteSwiftPackageReference "SwiftUICharts" */;
-			productName = SwiftUICharts;
-		};
-/* End XCSwiftPackageProductDependency section */
 
 /* Begin XCVersionGroup section */
 		CEA7440D2B36CE9B00DFA3CF /* LightTrackDataModel.xcdatamodeld */ = {

@@ -3,77 +3,79 @@
 import Foundation
 import CoreData
 
-class DataManager {
+/// アプリ全体で共有する Core Data スタックと測定記録の CRUD
+final class DataManager {
     static let shared = DataManager()
 
     let container: NSPersistentContainer
+    var context: NSManagedObjectContext { container.viewContext }
 
-    init() {
+    init(inMemory: Bool = false) {
         container = NSPersistentContainer(name: "LightTrackDataModel")
-        container.loadPersistentStores { (description, error) in
-            if let error = error {
-                fatalError("Core Data Store failed \(error.localizedDescription)")
+        if inMemory {
+            container.persistentStoreDescriptions.first?.url = URL(fileURLWithPath: "/dev/null")
+        }
+        container.loadPersistentStores { _, error in
+            if let error {
+                fatalError("Core Data Store failed: \(error.localizedDescription)")
             }
         }
+        container.viewContext.automaticallyMergesChangesFromParent = true
     }
 
+    /// 測定記録を新しい順に取得する
     func fetchHealthData() -> [HealthData] {
         let request: NSFetchRequest<HealthDataEntity> = HealthDataEntity.fetchRequest()
         request.sortDescriptors = [NSSortDescriptor(key: "date", ascending: false)]
-
         do {
-            let results = try container.viewContext.fetch(request).map { $0.toHealthData() }
-            return results
+            return try context.fetch(request).map { $0.toHealthData() }
         } catch {
             print("Failed to fetch HealthData: \(error)")
             return []
         }
     }
 
-    func saveHealthData(date: Date, weight: Double, bodyFatPercentage: Double?) {
-        let entity = HealthDataEntity(context: container.viewContext)
+    @discardableResult
+    func saveHealthData(date: Date, weight: Double, bodyFatPercentage: Double?) -> Bool {
+        let entity = HealthDataEntity(context: context)
         entity.date = date
         entity.weight = weight
         entity.bodyFatPercentage = bodyFatPercentage ?? 0
-
-        do {
-            try container.viewContext.save()
-            print("HealthData saved successfully: \(date), \(weight), \(String(describing: bodyFatPercentage))")
-        } catch {
-            container.viewContext.rollback()
-            print("Failed to save HealthData: \(error)")
-        }
-    }
-    
-    func updateHealthData(record: HealthData, newWeight: Double, newBodyFat: Double?, newDate: Date) {
-        let request: NSFetchRequest<HealthDataEntity> = HealthDataEntity.fetchRequest()
-        request.predicate = NSPredicate(format: "date == %@", record.date as CVarArg)
-
-        do {
-            let results = try container.viewContext.fetch(request)
-            if let entity = results.first {
-                entity.weight = newWeight
-                entity.bodyFatPercentage = newBodyFat ?? 0
-                entity.date = newDate
-                try container.viewContext.save()
-            }
-        } catch {
-            print("Update failed: \(error)")
-        }
+        return saveContext()
     }
 
-    func deleteHealthData(record: HealthData) {
-        let request: NSFetchRequest<HealthDataEntity> = HealthDataEntity.fetchRequest()
-        request.predicate = NSPredicate(format: "date == %@", record.date as CVarArg)
+    @discardableResult
+    func updateHealthData(_ record: HealthData, date: Date, weight: Double, bodyFatPercentage: Double?) -> Bool {
+        guard let entity = entity(for: record) else { return false }
+        entity.date = date
+        entity.weight = weight
+        entity.bodyFatPercentage = bodyFatPercentage ?? 0
+        return saveContext()
+    }
 
+    @discardableResult
+    func deleteHealthData(_ records: [HealthData]) -> Bool {
+        records.compactMap(entity(for:)).forEach(context.delete)
+        return saveContext()
+    }
+
+    // MARK: - Private
+
+    /// ObjectID で対象を特定する（以前は日時で検索していたため、同時刻の記録で誤更新が起きていた）
+    private func entity(for record: HealthData) -> HealthDataEntity? {
+        guard let objectID = record.objectID else { return nil }
+        return try? context.existingObject(with: objectID) as? HealthDataEntity
+    }
+
+    private func saveContext() -> Bool {
+        guard context.hasChanges else { return true }
         do {
-            let results = try container.viewContext.fetch(request)
-            if let entity = results.first {
-                container.viewContext.delete(entity)
-                try container.viewContext.save()
-            }
+            try context.save()
+            return true
         } catch {
-            print("Deletion failed: \(error)")
+            context.rollback()
+            print("Failed to save context: \(error)")
+            return false
         }
     }
 }

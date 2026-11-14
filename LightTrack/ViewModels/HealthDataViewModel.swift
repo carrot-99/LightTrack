@@ -1,130 +1,181 @@
 //  HealthDataViewModel.swift
 
 import Foundation
-import Combine
-import SwiftUICharts
 
-class HealthDataViewModel: ObservableObject {
-    @Published var latestHealthData: HealthData
-    @Published var healthDataRecords: [HealthData] = []
-    @Published var actualWeightChartDataPoints: [LineChartDataPoint] = []
-    @Published var isLoading = false
-    var userHeight: Double
-    var weightChartDataPoints: [LineChartDataPoint] {
-        let groupedByDay = Dictionary(grouping: healthDataRecords) { $0.date.startOfDay }
-        let sortedDates = groupedByDay.keys.sorted()
-
-        var dataPoints: [LineChartDataPoint] = []
-        for date in sortedDates {
-            if let recordsForDay = groupedByDay[date], let latestRecord = recordsForDay.max(by: { $0.date < $1.date }) {
-                let dayLabel = DateFormatter.localizedString(from: latestRecord.date, dateStyle: .medium, timeStyle: .short)
-                dataPoints.append(LineChartDataPoint(value: latestRecord.weight, xAxisLabel: dayLabel, description: dayLabel))
-            }
-        }
-        return dataPoints
-    }
-    
-    init() {
-        let fetchedRecords = DataManager.shared.fetchHealthData()
-        self.healthDataRecords = fetchedRecords
-        self.latestHealthData = fetchedRecords.first ?? HealthData(date: Date(), weight: 70.0, bodyFatPercentage: 22.0)
-        self.userHeight = UserSettingsManager.shared.fetchHeight()
+/// アプリ全体で 1 つだけ生成し、Environment で共有する
+@MainActor
+final class HealthDataViewModel: ObservableObject {
+    /// 新しい順に並んだ測定記録
+    @Published private(set) var records: [HealthData] = []
+    @Published private(set) var userHeight: Double
+    @Published var goalWeight: Double? {
+        didSet { saveGoalWeight() }
     }
 
-    func calculateBMI() -> Double {
-        return latestHealthData.calculateBMI(height: userHeight)
-    }
-    
-    func fetchLatestHealthData() {
-        let fetchedRecords = DataManager.shared.fetchHealthData()
-        self.healthDataRecords = fetchedRecords.sorted(by: { $0.date > $1.date })
-        if let mostRecent = fetchedRecords.first {
-            self.latestHealthData = mostRecent
-        }
-    }
-    
-    func addNewWeight(weight: Double, date: Date, bodyFatPercentage: Double?) {
-        let newData = HealthData(
-            date: date,
-            weight: weight,
-            bodyFatPercentage: bodyFatPercentage
-        )
+    private let dataManager: DataManager
+    private let settingsManager: UserSettingsManager
+    private let defaults: UserDefaults
+    private static let goalWeightKey = "goalWeight"
 
-        healthDataRecords.insert(newData, at: 0)
+    init(
+        dataManager: DataManager = .shared,
+        settingsManager: UserSettingsManager = .shared,
+        defaults: UserDefaults = .standard
+    ) {
+        self.dataManager = dataManager
+        self.settingsManager = settingsManager
+        self.defaults = defaults
+        self.userHeight = settingsManager.fetchHeight()
+        let goal = defaults.double(forKey: Self.goalWeightKey)
+        self.goalWeight = goal > 0 ? goal : nil
+        reload()
+    }
 
-        if date > latestHealthData.date {
-            latestHealthData = newData
-        }
+    // MARK: - 最新値
 
-        DataManager.shared.saveHealthData(
-            date: date,
-            weight: weight,
-            bodyFatPercentage: bodyFatPercentage
-        )
+    var latest: HealthData? { records.first }
+    var previous: HealthData? { records.dropFirst().first }
+
+    var latestBMI: Double? { latest?.bmi(heightCm: userHeight) }
+
+    /// 前回記録との体重差
+    var weightChangeFromPrevious: Double? {
+        guard let latest, let previous else { return nil }
+        return latest.weight - previous.weight
     }
-    
-    func updateRecord(record: HealthData, newWeight: Double, newBodyFat: Double?, newDate: Date) {
-        DataManager.shared.updateHealthData(record: record, newWeight: newWeight, newBodyFat: newBodyFat, newDate: newDate)
-        fetchLatestHealthData()
+
+    /// 目標体重までの残り（マイナスなら減量が必要）
+    var remainingToGoal: Double? {
+        guard let latest, let goalWeight else { return nil }
+        return goalWeight - latest.weight
     }
-    
-    func deleteRecord(record: HealthData) {
-        DataManager.shared.deleteHealthData(record: record)
-        fetchLatestHealthData()
+
+    var latestBodyFat: Double? {
+        records.first(where: { $0.bodyFatPercentage != nil })?.bodyFatPercentage
     }
-    
-    func generateDataPoints(forPeriod period: Period) -> [LineChartDataPoint] {
-        let sortedRecords = healthDataRecords.sorted { $0.date < $1.date }
+
+    // MARK: - CRUD
+
+    func reload() {
+        records = dataManager.fetchHealthData()
+    }
+
+    @discardableResult
+    func addRecord(date: Date, weight: Double, bodyFatPercentage: Double?) -> Bool {
+        let success = dataManager.saveHealthData(date: date, weight: weight, bodyFatPercentage: bodyFatPercentage)
+        reload()
+        return success
+    }
+
+    @discardableResult
+    func updateRecord(_ record: HealthData, date: Date, weight: Double, bodyFatPercentage: Double?) -> Bool {
+        let success = dataManager.updateHealthData(record, date: date, weight: weight, bodyFatPercentage: bodyFatPercentage)
+        reload()
+        return success
+    }
+
+    func deleteRecords(_ targets: [HealthData]) {
+        dataManager.deleteHealthData(targets)
+        reload()
+    }
+
+    func updateHeight(_ height: Double) {
+        settingsManager.saveHeight(height)
+        userHeight = height
+    }
+
+    // MARK: - グラフ
+
+    /// 指定期間の記録（古い順・1日1件＝その日の最後の記録）
+    func dailyRecords(in period: ChartPeriod) -> [HealthData] {
+        let start = period.startDate()
         let calendar = Calendar.current
-        
-        // 期間に応じた開始日を取得
-        let startDate = calendar.date(byAdding: period.dateComponent, value: period.value, to: Date())!
-        let endDate = Date()
-        
-        var lastValue: Double?
-        var dataPoints: [LineChartDataPoint] = []
-        
-        for date in Date.dates(from: startDate, to: endDate) {
-            let dayLabel = DateFormatter.localizedString(from: date, dateStyle: .medium, timeStyle: .none)
-            if let record = sortedRecords.first(where: { calendar.isDate($0.date, inSameDayAs: date) }) {
-                lastValue = record.weight
-                dataPoints.append(LineChartDataPoint(value: record.weight, xAxisLabel: dayLabel, description: dayLabel))
-            } else if let lastValue = lastValue {
-                // データが欠けている日には最後の値を使用
-                dataPoints.append(LineChartDataPoint(value: lastValue, xAxisLabel: dayLabel, description: dayLabel))
+        var seenDays = Set<Date>()
+        var result: [HealthData] = []
+        // records は新しい順なので、各日で最初に出てくるものがその日の最新
+        for record in records {
+            if let start, record.date < start { break }
+            let day = calendar.startOfDay(for: record.date)
+            if seenDays.insert(day).inserted {
+                result.append(record)
             }
         }
-        
-        return dataPoints
+        return result.reversed()
     }
-    
-    var weights: [Double] {
-        healthDataRecords.map { $0.weight }
+
+    func chartPoints(metric: ChartMetric, period: ChartPeriod) -> [ChartPoint] {
+        dailyRecords(in: period).compactMap { record in
+            let value: Double?
+            switch metric {
+            case .weight: value = record.weight
+            case .bodyFat: value = record.bodyFatPercentage
+            case .bmi: value = record.bmi(heightCm: userHeight)
+            }
+            return value.map { ChartPoint(date: Calendar.current.startOfDay(for: record.date), value: $0) }
+        }
     }
-    
-    var bmiValues: [Double] {
-        healthDataRecords.map { $0.calculateBMI(height: userHeight) }
+
+    // MARK: - エクスポート
+
+    /// CSV ファイルを一時ディレクトリに書き出して URL を返す
+    func exportCSV() -> URL? {
+        let formatter = ISO8601DateFormatter()
+        formatter.timeZone = .current
+        formatter.formatOptions = [.withFullDate, .withTime, .withColonSeparatorInTime, .withDashSeparatorInDate, .withSpaceBetweenDateAndTime]
+
+        var lines = ["日時,体重(kg),体脂肪率(%),BMI"]
+        for record in records.reversed() {
+            let bodyFat = record.bodyFatPercentage.map { NumberInput.format($0) } ?? ""
+            let bmi = record.bmi(heightCm: userHeight).map { NumberInput.format($0) } ?? ""
+            lines.append("\(formatter.string(from: record.date)),\(NumberInput.format(record.weight, digits: 2)),\(bodyFat),\(bmi)")
+        }
+
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("LightTrack.csv")
+        do {
+            // Excel で文字化けしないよう BOM 付き UTF-8 で書き出す
+            let data = Data([0xEF, 0xBB, 0xBF]) + Data(lines.joined(separator: "\n").utf8)
+            try data.write(to: url, options: .atomic)
+            return url
+        } catch {
+            print("Failed to export CSV: \(error)")
+            return nil
+        }
+    }
+
+    // MARK: - Private
+
+    private func saveGoalWeight() {
+        if let goalWeight {
+            defaults.set(goalWeight, forKey: Self.goalWeightKey)
+        } else {
+            defaults.removeObject(forKey: Self.goalWeightKey)
+        }
     }
 }
+
+// MARK: - Preview / サンプルデータ
 
 extension HealthDataViewModel {
-    func updateDataPoints(forPeriod period: Period) {
-        isLoading = true
-        DispatchQueue.global(qos: .userInitiated).async {
-            sleep(1)  // 時間のかかる処理を模擬
-
-            let newWeightChartDataPoints = self.generateDataPoints(forPeriod: period)
-
-            DispatchQueue.main.async {
-                self.actualWeightChartDataPoints = newWeightChartDataPoints
-                self.isLoading = false
-            }
+    /// 開発用のサンプルデータを投入する
+    static func seedSampleData(into manager: DataManager, days: Int = 120) {
+        let calendar = Calendar.current
+        for offset in 0..<days {
+            let date = calendar.date(byAdding: .day, value: -offset, to: Date())!
+            manager.saveHealthData(
+                date: date,
+                weight: 68 + sin(Double(offset) / 4) + Double(offset) * 0.05,
+                bodyFatPercentage: offset.isMultiple(of: 3) ? 21 + Double(offset) * 0.03 : nil
+            )
         }
     }
-}
 
-extension Date {
-    var startOfDay: Date {
-        return Calendar.current.startOfDay(for: self)
+    static var preview: HealthDataViewModel {
+        let manager = DataManager(inMemory: true)
+        seedSampleData(into: manager, days: 40)
+        return HealthDataViewModel(
+            dataManager: manager,
+            settingsManager: UserSettingsManager(dataManager: manager),
+            defaults: UserDefaults(suiteName: "preview") ?? .standard
+        )
     }
 }
