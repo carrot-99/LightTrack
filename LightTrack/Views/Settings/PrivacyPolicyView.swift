@@ -21,13 +21,11 @@ struct PrivacyPolicyView: View {
                         .padding(.bottom)
                 }
                 
-                Spacer()
-                    .frame(height: 50)
             }
             .padding()
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .textSelection(.enabled)
         }
-        .background(Color(red: 44 / 255, green: 44 / 255, blue: 46 / 255))
-        .foregroundColor(.white)
         .navigationTitle("プライバシーポリシー")
     }
 }

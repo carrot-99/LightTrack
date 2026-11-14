@@ -25,13 +25,11 @@ struct TermsView: View {
                 Group {
                     Text("7. 連絡先\n本アプリに関するお問い合わせは、運営者の公式メールアドレスまでお願いします。詳細はアプリ内の「お問い合わせ」セクションをご参照ください。")
                 }
-                Spacer()
-                    .frame(height: 50)
             }
             .padding()
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .textSelection(.enabled)
         }
-        .background(Color(red: 44 / 255, green: 44 / 255, blue: 46 / 255))
-        .foregroundColor(.white)
         .navigationTitle("利用規約")
     }
 }

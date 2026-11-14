@@ -3,38 +3,66 @@
 import SwiftUI
 
 struct InitialHeightView: View {
-    @State private var height: String = ""
     var onHeightSet: (Double) -> Void
 
+    @State private var heightText = ""
+    @FocusState private var isFocused: Bool
+
+    private var height: Double? {
+        NumberInput.parse(heightText).flatMap { ValidationRange.height.contains($0) ? $0 : nil }
+    }
+
     var body: some View {
-        VStack {
-            Group {
+        VStack(spacing: 24) {
+            Spacer()
+
+            Image(systemName: "figure.stand")
+                .font(.system(size: 56))
+                .foregroundStyle(Color.accentColor)
+
+            VStack(spacing: 8) {
                 Text("身長を入力してください")
-                Text("BMIの計算にのみ使用されます")
+                    .font(.title2.bold())
+                Text("BMI の計算にのみ使用します。\nあとから設定画面で変更できます。")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
             }
-            .font(.headline)
-            .padding(.top, 20)
 
-            TextField("身長(cm)", text: $height)
-                .keyboardType(.decimalPad)
-                .padding()
-                .frame(maxWidth: .infinity)
-                .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.gray, lineWidth: 1))
-                .padding(.horizontal, 20)
-
-            Button("保存") {
-                if let heightValue = Double(height) {
-                    onHeightSet(heightValue)
-                }
+            HStack(alignment: .firstTextBaseline) {
+                TextField("170.0", text: $heightText)
+                    .keyboardType(.decimalPad)
+                    .font(.system(size: 40, weight: .semibold, design: .rounded))
+                    .multilineTextAlignment(.center)
+                    .focused($isFocused)
+                    .frame(maxWidth: 180)
+                Text("cm")
+                    .font(.title3)
+                    .foregroundStyle(.secondary)
             }
-            .padding()
-            .foregroundColor(.white)
-            .background(Color.blue)
-            .cornerRadius(10)
-            .padding(.top, 10)
+            .padding(.vertical, 12)
+            .padding(.horizontal, 20)
+            .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 16))
+
+            if !heightText.isEmpty && height == nil {
+                Text("\(Int(ValidationRange.height.lowerBound))〜\(Int(ValidationRange.height.upperBound)) cm の範囲で入力してください")
+                    .font(.caption)
+                    .foregroundStyle(.red)
+            }
 
             Spacer()
+
+            Button("はじめる") {
+                if let height { onHeightSet(height) }
+            }
+            .buttonStyle(PrimaryButtonStyle())
+            .disabled(height == nil)
         }
-        .padding()
+        .padding(24)
+        .onAppear { isFocused = true }
     }
+}
+
+#Preview {
+    InitialHeightView { _ in }
 }
